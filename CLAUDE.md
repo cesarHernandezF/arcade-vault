@@ -25,3 +25,7 @@ There is no test runner configured.
 - Path alias `@/*` maps to the repo root.
 - **This Next.js version has breaking changes from what you may know** (see `AGENTS.md`). Before writing Next.js code, read the relevant guide in `node_modules/next/dist/docs/` (`01-app`, `02-pages`, `03-architecture`, `04-community`) and heed deprecation notices.
 - `AGENTS.md` is auto-written by `next dev`; commit it rather than removing it.
+
+
+## Skill
+Usa siempre /frontend-design para diseñar la interfaz de usuario.
