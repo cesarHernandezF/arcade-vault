@@ -1,6 +1,6 @@
 # SPEC 02 — Home: landing page de Arcade Vault
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 01
 > **Date:** 2026-11-06
 > **Objective:** Implementar en Next.js la landing page (Home) de `references/templates/home-about/home.jsx` en `/`, mover la Biblioteca a `/biblioteca` y agregar el enlace "Inicio" al nav.
