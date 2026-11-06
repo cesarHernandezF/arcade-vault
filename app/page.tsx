@@ -1,8 +1,10 @@
 import Link from "next/link";
 import FeatureIcon from "@/components/feature-icon";
 import FloatingSilhouettes from "@/components/floating-silhouettes";
+import MiniCard from "@/components/mini-card";
 import RevealObserver from "@/components/reveal-observer";
-import { FEATURES } from "@/lib/home";
+import { GAMES } from "@/lib/games";
+import { FEATURES, HOME_STATS } from "@/lib/home";
 
 export default function Home() {
   return (
@@ -58,6 +60,42 @@ export default function Home() {
               <FeatureIcon kind={f.icon} />
               <div className="ft-title pixel">{f.title}</div>
               <div className="ft-desc">{f.desc}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* GAMES PREVIEW */}
+      <section className="home-section reveal">
+        <div className="section-head">
+          <div className="kicker pixel neon-cyan">{"// 02"}</div>
+          <h2 className="section-title">JUEGOS DISPONIBLES AHORA</h2>
+          <div className="section-rule"></div>
+        </div>
+        <div className="mini-rail">
+          {GAMES.slice(0, 6).map((g) => (
+            <MiniCard key={g.id} game={g} />
+          ))}
+        </div>
+        <div style={{ textAlign: "center", marginTop: 24 }}>
+          <Link href="/biblioteca" className="btn lg">
+            VER TODOS LOS JUEGOS →
+          </Link>
+        </div>
+      </section>
+
+      {/* STATS */}
+      <section className="home-stats reveal">
+        <div className="stats-inner">
+          {HOME_STATS.map((st, i) => (
+            <div
+              key={st.n}
+              className="stat-block"
+              style={{ transitionDelay: i * 90 + "ms" }}
+            >
+              <div className="stat-n neon-yellow">{st.n}</div>
+              <div className="stat-u pixel">{st.unit}</div>
+              <div className="stat-s">{st.sub}</div>
             </div>
           ))}
         </div>
