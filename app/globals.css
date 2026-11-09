@@ -739,6 +739,15 @@ a { color: inherit; text-decoration: none; }
   50% { transform: translate(20px, 10px); }
 }
 
+/* canvas real de un juego del registro */
+.game-canvas {
+  position: absolute; inset: 0;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: #000;
+}
+
 /* game over modal */
 .modal-bd {
   position: fixed; inset: 0; z-index: 80;
