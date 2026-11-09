@@ -66,7 +66,7 @@ export default function Home() {
           ))}
         </div>
       </section>
-      {/* GAMES PREVIEW */}
+      {/* VISTA PREVIA DE JUEGOS */}
       <section className="home-section reveal">
         <div className="section-head">
           <div className="kicker pixel neon-cyan">{"// 02"}</div>
