@@ -3,12 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { saveScore } from "@/app/juegos/[id]/jugar/actions";
 import GameCanvas from "@/components/game-canvas";
 import type { GameEngine } from "@/lib/game-engine";
 import type { Game } from "@/lib/games";
 import { useSession } from "@/lib/session";
 
 const INITIAL_LIVES = 3;
+const PLAYER_NAME_KEY = "av_player_name";
 
 export default function GamePlayer({ game }: { game: Game }) {
   const router = useRouter();
@@ -22,8 +24,24 @@ export default function GamePlayer({ game }: { game: Game }) {
   // La sesión se lee tras el montaje; mientras el usuario no edite, el nombre sigue a la sesión.
   const [editedName, setEditedName] = useState<string | null>(null);
 
-  const name = editedName ?? user?.name ?? "INVITADO";
+  // Nombre recordado de partidas anteriores; se lee tras el montaje (como lib/session.tsx).
+  const [storedName, setStoredName] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  // Orden del valor inicial: nombre recordado, nombre de sesión, INVITADO.
+  const name = editedName ?? storedName ?? user?.name ?? "INVITADO";
   const engineRef = useRef<GameEngine | null>(null);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(PLAYER_NAME_KEY);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (raw) setStoredName(raw.toUpperCase().slice(0, 10));
+    } catch {
+      // localStorage bloqueado: se usa el nombre de sesión o INVITADO.
+    }
+  }, []);
 
   // React controla la pausa: el motor solo expone pause() y resume().
   useEffect(() => {
@@ -38,6 +56,8 @@ export default function GamePlayer({ game }: { game: Game }) {
     setPaused(false);
     setOver(false);
     setSaved(false);
+    setSaving(false);
+    setSaveError(null);
   };
 
   const restart = () => {
@@ -48,6 +68,32 @@ export default function GamePlayer({ game }: { game: Game }) {
   const finish = () => {
     if (engineRef.current) engineRef.current.endGame();
     else setOver(true);
+  };
+
+  const handleSave = async () => {
+    if (saving || saved) return;
+    setSaving(true);
+    setSaveError(null);
+    let result;
+    try {
+      result = await saveScore(game.id, name, score);
+    } catch {
+      result = { ok: false as const, error: "SIN CONEXIÓN. INTÉNTALO DE NUEVO." };
+    }
+    setSaving(false);
+    if (!result.ok) {
+      setSaveError(result.error);
+      return;
+    }
+    setSaved(true);
+    // Solo se recuerda el nombre si la persona lo editó y el guardado salió bien.
+    if (editedName !== null) {
+      try {
+        localStorage.setItem(PLAYER_NAME_KEY, name.trim());
+      } catch {
+        // localStorage bloqueado: la puntuación ya está guardada en Supabase.
+      }
+    }
   };
 
   return (
@@ -157,10 +203,27 @@ export default function GamePlayer({ game }: { game: Game }) {
                   onChange={(e) => setEditedName(e.target.value.toUpperCase().slice(0, 10))}
                   placeholder="TUS INICIALES"
                 />
-                <button className="btn yellow">GUARDAR PUNTUACIÓN</button>
+                <button className="btn yellow" onClick={handleSave} disabled={saving}>
+                  {saving ? "GUARDANDO_" : "GUARDAR PUNTUACIÓN"}
+                </button>
               </div>
             ) : (
               <div className="toast-saved">▸ PUNTUACIÓN GUARDADA_</div>
+            )}
+            {saveError && !saved && (
+              <div
+                role="alert"
+                className="pixel"
+                style={{
+                  fontSize: 10,
+                  lineHeight: 1.8,
+                  color: "var(--magenta)",
+                  textShadow: "0 0 6px rgba(255,0,110,0.45)",
+                  marginTop: 14,
+                }}
+              >
+                ▸ {saveError}
+              </div>
             )}
             <div className="actions">
               <button
