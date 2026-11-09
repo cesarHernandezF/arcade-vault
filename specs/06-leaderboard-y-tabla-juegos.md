@@ -1,6 +1,6 @@
 # SPEC 06 — Tabla de juegos y leaderboard en Supabase
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 01, SPEC 04, SPEC 05
 > **Date:** 2026-11-09
 > **Objective:** Crear en Supabase las tablas `games` y `scores` (sin datos falsos, con `user_id` nulo) y migrar a ellas la biblioteca, el Home, la ficha, la página de jugar, el guardado de puntuaciones y el Salón de la Fama, eliminando el catálogo local `GAMES` y `seededScores`.
