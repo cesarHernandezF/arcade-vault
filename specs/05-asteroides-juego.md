@@ -1,6 +1,6 @@
 # SPEC 05 — Juego Asteroides en la plataforma
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 01
 > **Date:** 2026-11-09
 > **Objective:** Adaptar el juego Asteroides de `references/started-games/02-asteroids` como un módulo TypeScript aislado que se dibuja en su propio canvas dentro del marco CRT de `/juegos/asteroides/jugar` y notifica a React puntaje, vidas, nivel y fin de partida mediante callbacks, mientras React controla la pausa, el reinicio y el fin.
