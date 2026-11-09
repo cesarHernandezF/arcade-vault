@@ -1,9 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import GameCanvas from "@/components/game-canvas";
+import type { GameEngine } from "@/lib/game-engine";
 import type { Game } from "@/lib/games";
+import { GAME_ENGINES } from "@/lib/games/registry";
 import { useSession } from "@/lib/session";
 
 const INITIAL_LIVES = 3;
@@ -13,6 +16,7 @@ export default function GamePlayer({ game }: { game: Game }) {
   const { user } = useSession();
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(INITIAL_LIVES);
+  const [engineLevel, setEngineLevel] = useState(1);
   const [paused, setPaused] = useState(false);
   const [over, setOver] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -20,23 +24,44 @@ export default function GamePlayer({ game }: { game: Game }) {
   const [editedName, setEditedName] = useState<string | null>(null);
 
   const name = editedName ?? user?.name ?? "INVITADO";
-  const level = 1 + Math.floor(score / 2500);
+  // Los juegos del registro usan su motor real; el resto conserva la simulación.
+  const hasEngine = game.id in GAME_ENGINES;
+  const engineRef = useRef<GameEngine | null>(null);
+  const level = hasEngine ? engineLevel : 1 + Math.floor(score / 2500);
 
   useEffect(() => {
-    if (over || paused) return;
+    if (hasEngine || over || paused) return;
     const t = setInterval(
       () => setScore((s) => s + Math.floor(10 + Math.random() * 90)),
       220,
     );
     return () => clearInterval(t);
-  }, [over, paused]);
+  }, [hasEngine, over, paused]);
 
-  const restart = () => {
+  // React controla la pausa: el motor solo expone pause() y resume().
+  useEffect(() => {
+    if (!hasEngine) return;
+    if (paused) engineRef.current?.pause();
+    else engineRef.current?.resume();
+  }, [hasEngine, paused]);
+
+  const resetState = () => {
     setScore(0);
     setLives(INITIAL_LIVES);
+    setEngineLevel(1);
     setPaused(false);
     setOver(false);
     setSaved(false);
+  };
+
+  const restart = () => {
+    resetState();
+    engineRef.current?.restart();
+  };
+
+  const finish = () => {
+    if (engineRef.current) engineRef.current.endGame();
+    else setOver(true);
   };
 
   const saveScore = () => {
@@ -74,10 +99,22 @@ export default function GamePlayer({ game }: { game: Game }) {
           </div>
         </div>
         <div className="hud-actions">
-          <button className="btn yellow" onClick={() => setPaused((p) => !p)}>
+          <button
+            className="btn yellow"
+            onClick={(e) => {
+              setPaused((p) => !p);
+              e.currentTarget.blur();
+            }}
+          >
             {paused ? "REANUDAR" : "PAUSA"}
           </button>
-          <button className="btn magenta" onClick={() => setOver(true)}>
+          <button
+            className="btn magenta"
+            onClick={(e) => {
+              finish();
+              e.currentTarget.blur();
+            }}
+          >
             FIN
           </button>
           <Link href={`/juegos/${game.id}`} className="btn ghost">
@@ -88,13 +125,32 @@ export default function GamePlayer({ game }: { game: Game }) {
 
       <div className="crt">
         <div className="crt-screen">
-          <div className="game-arena">
-            <div className="grid-floor"></div>
-            <div className="enemy e1"></div>
-            <div className="enemy e2"></div>
-            <div className="enemy e3"></div>
-            <div className="player-ship"></div>
-          </div>
+          {hasEngine ? (
+            <GameCanvas
+              id={game.id}
+              events={{
+                onScore: setScore,
+                onLives: setLives,
+                onLevel: setEngineLevel,
+                onGameOver: (finalScore) => {
+                  setScore(finalScore);
+                  setOver(true);
+                },
+                onRestart: resetState,
+              }}
+              onEngine={(engine) => {
+                engineRef.current = engine;
+              }}
+            />
+          ) : (
+            <div className="game-arena">
+              <div className="grid-floor"></div>
+              <div className="enemy e1"></div>
+              <div className="enemy e2"></div>
+              <div className="enemy e3"></div>
+              <div className="player-ship"></div>
+            </div>
+          )}
           {paused && (
             <div className="crt-content" style={{ background: "rgba(0,0,0,0.6)", zIndex: 5 }}>
               <div>
@@ -144,7 +200,13 @@ export default function GamePlayer({ game }: { game: Game }) {
               <div className="toast-saved">▸ PUNTUACIÓN GUARDADA_</div>
             )}
             <div className="actions">
-              <button className="btn" onClick={restart}>
+              <button
+                className="btn"
+                onClick={(e) => {
+                  restart();
+                  e.currentTarget.blur();
+                }}
+              >
                 JUGAR DE NUEVO
               </button>
               <button className="btn magenta" onClick={() => router.push("/biblioteca")}>
