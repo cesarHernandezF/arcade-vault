@@ -1,13 +1,9 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { GAMES } from "@/lib/games";
-import { seededScores } from "@/lib/scores";
+import { getGame } from "@/lib/games-db";
+import { getTopScores } from "@/lib/scores";
 import Leaderboard from "@/components/leaderboard";
-
-export function generateStaticParams() {
-  return GAMES.map((g) => ({ id: g.id }));
-}
 
 export default function GameDetailPage({ params }: PageProps<"/juegos/[id]">) {
   return (
@@ -19,10 +15,10 @@ export default function GameDetailPage({ params }: PageProps<"/juegos/[id]">) {
 
 async function GameDetail({ params }: { params: PageProps<"/juegos/[id]">["params"] }) {
   const { id } = await params;
-  const game = GAMES.find((g) => g.id === id);
+  const game = await getGame(id);
   if (!game) notFound();
 
-  const scores = seededScores(id.length * 17 + 3, 10);
+  const scores = await getTopScores(id);
 
   return (
     <div className="av-detail fade-in">
@@ -41,8 +37,8 @@ async function GameDetail({ params }: { params: PageProps<"/juegos/[id]">["param
           <p>{game.long}</p>
           <div className="stat-strip">
             <div>
-              <div className="l">Partidas</div>
-              <div className="v">{game.plays}</div>
+              <div className="l">Puntuaciones</div>
+              <div className="v">{game.entries}</div>
             </div>
             <div>
               <div className="l">Mejor global</div>
@@ -50,7 +46,7 @@ async function GameDetail({ params }: { params: PageProps<"/juegos/[id]">["param
                 className="v"
                 style={{ color: "var(--magenta)", textShadow: "0 0 6px rgba(255,0,110,0.5)" }}
               >
-                {game.best.toLocaleString("es-ES")}
+                {game.best?.toLocaleString("es-ES") ?? "—"}
               </div>
             </div>
             <div>

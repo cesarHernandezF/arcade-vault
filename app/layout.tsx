@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Press_Start_2P, JetBrains_Mono, Courier_Prime } from "next/font/google";
 import "./globals.css";
@@ -39,7 +40,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <div className="av-noise" />
         <div id="root">
           <SessionProvider>
-            <Nav />
+            {/* usePathname() es dato de runtime: el fallback reserva la altura de la barra. */}
+            <Suspense fallback={<nav className="av-nav" aria-hidden="true" />}>
+              <Nav />
+            </Suspense>
             <main className="av-main">{children}</main>
             <Footer />
           </SessionProvider>

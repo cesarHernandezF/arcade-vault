@@ -1,23 +1,19 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import FeatureIcon from "@/components/feature-icon";
 import FloatingSilhouettes from "@/components/floating-silhouettes";
 import MiniCard from "@/components/mini-card";
 import RevealObserver from "@/components/reveal-observer";
-import { GAMES } from "@/lib/games";
-import {
-  FAQ,
-  FEATURES,
-  HOME_STATS,
-  PRICING_PERKS,
-  RECENT_SCORES,
-  TOP_PLAYERS,
-} from "@/lib/home";
-
+import { getGames } from "@/lib/games-db";
+import { FAQ, FEATURES, HOME_STATS, PRICING_PERKS, RECENT_SCORES, TOP_PLAYERS } from "@/lib/home";
+async function GamesRail() {
+  const games = await getGames();
+  return games.slice(0, 6).map((g) => <MiniCard key={g.id} game={g} />);
+}
 export default function Home() {
   return (
     <div className="home fade-in">
       <RevealObserver />
-
       {/* HERO */}
       <section className="home-hero">
         <FloatingSilhouettes />
@@ -49,7 +45,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
       {/* WHY */}
       <section className="home-section reveal">
         <div className="section-head">
@@ -71,8 +66,7 @@ export default function Home() {
           ))}
         </div>
       </section>
-
-      {/* GAMES PREVIEW */}
+      {/* VISTA PREVIA DE JUEGOS */}
       <section className="home-section reveal">
         <div className="section-head">
           <div className="kicker pixel neon-cyan">{"// 02"}</div>
@@ -80,9 +74,9 @@ export default function Home() {
           <div className="section-rule"></div>
         </div>
         <div className="mini-rail">
-          {GAMES.slice(0, 6).map((g) => (
-            <MiniCard key={g.id} game={g} />
-          ))}
+          <Suspense fallback={<div className="pixel">CARGANDO_</div>}>
+            <GamesRail />
+          </Suspense>
         </div>
         <div style={{ textAlign: "center", marginTop: 24 }}>
           <Link href="/biblioteca" className="btn lg">
@@ -90,16 +84,11 @@ export default function Home() {
           </Link>
         </div>
       </section>
-
       {/* STATS */}
       <section className="home-stats reveal">
         <div className="stats-inner">
           {HOME_STATS.map((st, i) => (
-            <div
-              key={st.n}
-              className="stat-block"
-              style={{ transitionDelay: i * 90 + "ms" }}
-            >
+            <div key={st.n} className="stat-block" style={{ transitionDelay: i * 90 + "ms" }}>
               <div className="stat-n neon-yellow">{st.n}</div>
               <div className="stat-u pixel">{st.unit}</div>
               <div className="stat-s">{st.sub}</div>
@@ -107,7 +96,6 @@ export default function Home() {
           ))}
         </div>
       </section>
-
       {/* RECENT ACTIVITY / LEADERBOARD */}
       <section className="home-section reveal">
         <div className="section-head">
@@ -122,11 +110,7 @@ export default function Home() {
             </div>
             <div className="ticker">
               {RECENT_SCORES.map((r, i) => (
-                <div
-                  key={r.player}
-                  className="tick-row"
-                  style={{ animationDelay: i * 60 + "ms" }}
-                >
+                <div key={r.player} className="tick-row" style={{ animationDelay: i * 60 + "ms" }}>
                   <span className={"tk-p neon-" + r.color}>{r.player}</span>
                   <span className="tk-mid">▸ {r.game}</span>
                   <span className="tk-s">+{r.score.toLocaleString("es-ES")}</span>
@@ -135,7 +119,6 @@ export default function Home() {
               ))}
             </div>
           </div>
-
           <div className="activity-card">
             <div className="ac-head">
               <div className="ac-title pixel neon-magenta">▸ TOP JUGADORES · HOY</div>
@@ -148,8 +131,7 @@ export default function Home() {
                 <div
                   key={r.player}
                   className={
-                    "top-row" +
-                    (i === 0 ? " top1" : i === 1 ? " top2" : i === 2 ? " top3" : "")
+                    "top-row" + (i === 0 ? " top1" : i === 1 ? " top2" : i === 2 ? " top3" : "")
                   }
                 >
                   <span className="tp-rk">#{String(r.rank).padStart(2, "0")}</span>
@@ -164,7 +146,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
       {/* PRICING */}
       <section className="home-section reveal">
         <div className="section-head">
@@ -196,7 +177,6 @@ export default function Home() {
               PLAY
             </div>
           </div>
-
           <div className="pricing-faq">
             {FAQ.map((item) => (
               <div key={item.q} className="faq-item">
@@ -207,16 +187,13 @@ export default function Home() {
           </div>
         </div>
       </section>
-
       {/* FINAL CTA */}
       <section className="home-final reveal">
         <h2 className="final-title pixel">¿LISTO PARA JUGAR?</h2>
         <Link href="/biblioteca" className="btn xl pulse final-cta">
           INSERTAR MONEDA →
         </Link>
-        <div className="final-tag">
-          Gratis. Sin registro obligatorio. Empieza en segundos.
-        </div>
+        <div className="final-tag">Gratis. Sin registro obligatorio. Empieza en segundos.</div>
       </section>
     </div>
   );

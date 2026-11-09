@@ -3,13 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { saveScore } from "@/app/juegos/[id]/jugar/actions";
 import GameCanvas from "@/components/game-canvas";
 import type { GameEngine } from "@/lib/game-engine";
 import type { Game } from "@/lib/games";
-import { GAME_ENGINES } from "@/lib/games/registry";
 import { useSession } from "@/lib/session";
 
 const INITIAL_LIVES = 3;
+const PLAYER_NAME_KEY = "av_player_name";
 
 export default function GamePlayer({ game }: { game: Game }) {
   const router = useRouter();
@@ -23,27 +24,30 @@ export default function GamePlayer({ game }: { game: Game }) {
   // La sesión se lee tras el montaje; mientras el usuario no edite, el nombre sigue a la sesión.
   const [editedName, setEditedName] = useState<string | null>(null);
 
-  const name = editedName ?? user?.name ?? "INVITADO";
-  // Los juegos del registro usan su motor real; el resto conserva la simulación.
-  const hasEngine = game.id in GAME_ENGINES;
+  // Nombre recordado de partidas anteriores; se lee tras el montaje (como lib/session.tsx).
+  const [storedName, setStoredName] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  // Orden del valor inicial: nombre recordado, nombre de sesión, INVITADO.
+  const name = editedName ?? storedName ?? user?.name ?? "INVITADO";
   const engineRef = useRef<GameEngine | null>(null);
-  const level = hasEngine ? engineLevel : 1 + Math.floor(score / 2500);
 
   useEffect(() => {
-    if (hasEngine || over || paused) return;
-    const t = setInterval(
-      () => setScore((s) => s + Math.floor(10 + Math.random() * 90)),
-      220,
-    );
-    return () => clearInterval(t);
-  }, [hasEngine, over, paused]);
+    try {
+      const raw = localStorage.getItem(PLAYER_NAME_KEY);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (raw) setStoredName(raw.toUpperCase().slice(0, 10));
+    } catch {
+      // localStorage bloqueado: se usa el nombre de sesión o INVITADO.
+    }
+  }, []);
 
   // React controla la pausa: el motor solo expone pause() y resume().
   useEffect(() => {
-    if (!hasEngine) return;
     if (paused) engineRef.current?.pause();
     else engineRef.current?.resume();
-  }, [hasEngine, paused]);
+  }, [paused]);
 
   const resetState = () => {
     setScore(0);
@@ -52,6 +56,8 @@ export default function GamePlayer({ game }: { game: Game }) {
     setPaused(false);
     setOver(false);
     setSaved(false);
+    setSaving(false);
+    setSaveError(null);
   };
 
   const restart = () => {
@@ -64,15 +70,30 @@ export default function GamePlayer({ game }: { game: Game }) {
     else setOver(true);
   };
 
-  const saveScore = () => {
+  const handleSave = async () => {
+    if (saving || saved) return;
+    setSaving(true);
+    setSaveError(null);
+    let result;
     try {
-      const all = JSON.parse(localStorage.getItem("av_scores") || "[]");
-      all.push({ game: game.id, score, name, at: Date.now() });
-      localStorage.setItem("av_scores", JSON.stringify(all));
+      result = await saveScore(game.id, name, score);
     } catch {
-      // localStorage bloqueado: la app sigue sin persistir.
+      result = { ok: false as const, error: "SIN CONEXIÓN. INTÉNTALO DE NUEVO." };
+    }
+    setSaving(false);
+    if (!result.ok) {
+      setSaveError(result.error);
+      return;
     }
     setSaved(true);
+    // Solo se recuerda el nombre si la persona lo editó y el guardado salió bien.
+    if (editedName !== null) {
+      try {
+        localStorage.setItem(PLAYER_NAME_KEY, name.trim());
+      } catch {
+        // localStorage bloqueado: la puntuación ya está guardada en Supabase.
+      }
+    }
   };
 
   return (
@@ -95,7 +116,7 @@ export default function GamePlayer({ game }: { game: Game }) {
           </div>
           <div className="hud-stat level">
             <div className="l">Nivel</div>
-            <div className="v">{String(level).padStart(2, "0")}</div>
+            <div className="v">{String(engineLevel).padStart(2, "0")}</div>
           </div>
         </div>
         <div className="hud-actions">
@@ -125,32 +146,22 @@ export default function GamePlayer({ game }: { game: Game }) {
 
       <div className="crt">
         <div className="crt-screen">
-          {hasEngine ? (
-            <GameCanvas
-              id={game.id}
-              events={{
-                onScore: setScore,
-                onLives: setLives,
-                onLevel: setEngineLevel,
-                onGameOver: (finalScore) => {
-                  setScore(finalScore);
-                  setOver(true);
-                },
-                onRestart: resetState,
-              }}
-              onEngine={(engine) => {
-                engineRef.current = engine;
-              }}
-            />
-          ) : (
-            <div className="game-arena">
-              <div className="grid-floor"></div>
-              <div className="enemy e1"></div>
-              <div className="enemy e2"></div>
-              <div className="enemy e3"></div>
-              <div className="player-ship"></div>
-            </div>
-          )}
+          <GameCanvas
+            id={game.id}
+            events={{
+              onScore: setScore,
+              onLives: setLives,
+              onLevel: setEngineLevel,
+              onGameOver: (finalScore) => {
+                setScore(finalScore);
+                setOver(true);
+              },
+              onRestart: resetState,
+            }}
+            onEngine={(engine) => {
+              engineRef.current = engine;
+            }}
+          />
           {paused && (
             <div className="crt-content" style={{ background: "rgba(0,0,0,0.6)", zIndex: 5 }}>
               <div>
@@ -192,12 +203,27 @@ export default function GamePlayer({ game }: { game: Game }) {
                   onChange={(e) => setEditedName(e.target.value.toUpperCase().slice(0, 10))}
                   placeholder="TUS INICIALES"
                 />
-                <button className="btn yellow" onClick={saveScore}>
-                  GUARDAR PUNTUACIÓN
+                <button className="btn yellow" onClick={handleSave} disabled={saving}>
+                  {saving ? "GUARDANDO_" : "GUARDAR PUNTUACIÓN"}
                 </button>
               </div>
             ) : (
               <div className="toast-saved">▸ PUNTUACIÓN GUARDADA_</div>
+            )}
+            {saveError && !saved && (
+              <div
+                role="alert"
+                className="pixel"
+                style={{
+                  fontSize: 10,
+                  lineHeight: 1.8,
+                  color: "var(--magenta)",
+                  textShadow: "0 0 6px rgba(255,0,110,0.45)",
+                  marginTop: 14,
+                }}
+              >
+                ▸ {saveError}
+              </div>
             )}
             <div className="actions">
               <button
