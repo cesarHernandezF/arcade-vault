@@ -42,7 +42,7 @@ async function GameDetail({ params }: { params: PageProps<"/juegos/[id]">["param
           <div className="stat-strip">
             <div>
               <div className="l">Partidas</div>
-              <div className="v">{game.plays}</div>
+              <div className="v">{game.entries}</div>
             </div>
             <div>
               <div className="l">Mejor global</div>
@@ -50,7 +50,7 @@ async function GameDetail({ params }: { params: PageProps<"/juegos/[id]">["param
                 className="v"
                 style={{ color: "var(--magenta)", textShadow: "0 0 6px rgba(255,0,110,0.5)" }}
               >
-                {game.best.toLocaleString("es-ES")}
+                {game.best?.toLocaleString("es-ES") ?? "—"}
               </div>
             </div>
             <div>
