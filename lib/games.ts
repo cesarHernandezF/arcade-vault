@@ -102,6 +102,17 @@ export const GAMES: Game[] = [
     best: 24,
     plays: "4.2K",
   },
+  {
+    id: "asteroides",
+    title: "ASTEROIDES",
+    short: "Rota, propulsa y dispara para pulverizar asteroides.",
+    long: "Tu nave triangular deriva en el vacío sin fricción. Rota, propulsa y dispara para partir cada asteroide en fragmentos más pequeños y veloces. Atrapa el power-up 3x para disparar en abanico y despeja el campo para avanzar de nivel.",
+    cat: "SHOOTER",
+    cover: "cover-asteroides",
+    color: "cyan",
+    best: 0,
+    plays: "0",
+  },
 ];
 
 export const CATS = ["TODOS", "ARCADE", "PUZZLE", "SHOOTER", "VERSUS"] as const;
