@@ -12,4 +12,5 @@ export const GAME_META: Record<string, Partial<GameMeta>> = {
 };
 export const GAME_ENGINES: Record<string, () => Promise<{ createEngine: CreateEngine }>> = {
   asteroides: () => import("@/lib/games/asteroides/engine"),
+  tetris: () => import("@/lib/games/tetris/engine"),
 };
