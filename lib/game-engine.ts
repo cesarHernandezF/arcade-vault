@@ -4,7 +4,8 @@ export interface GameEvents {
   onLives: (lives: number) => void;
   onLevel: (level: number) => void;
   onGameOver: (finalScore: number) => void;
-  onRestart: () => void; // reinicio iniciado desde el canvas (Espacio); no se emite en restart()
+  onRestart: () => void; // reinicio iniciado desde el canvas (Espacio o Enter); no se emite en restart()
+  onLines?: (lines: number) => void; // solo Tetris
 }
 // Acciones que React puede ordenar al motor
 export interface GameEngine {

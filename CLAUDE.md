@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Arcade Vault: a platform to play games online and compete for the highest score (README is in Spanish). The repo is currently a fresh Create Next App scaffold (`app/layout.tsx`, `app/page.tsx`, `app/globals.css`) with no game, scoring, or backend code yet.
 
-The README states the project follows Spec Driven Design, based on `/spec` and `/spec-impl`, using the skills from https://github.com/Klerith/fernando-skills (installed with `npx skills@latest add Klerith/fernando-skills`). Prefer writing/consulting a spec before implementing features.
+The README states the project follows Spec Driven Design, based on `/spec` and `/spec-impl`, using the skills from https://github.com/Klerith/fernando-skills (installed with `npx skills@latest add Klerith/fernando-skills`). Prefer writing/consulting a spec before implementing features. To add a new game (from `references/started-games/` or from scratch) run `/add-game`: it writes the spec (engine, registry, `games` row, cover, leaderboard) and `/spec-impl` implements it.
 
 ## Commands
 
@@ -26,6 +26,6 @@ There is no test runner configured.
 - **This Next.js version has breaking changes from what you may know** (see `AGENTS.md`). Before writing Next.js code, read the relevant guide in `node_modules/next/dist/docs/` (`01-app`, `02-pages`, `03-architecture`, `04-community`) and heed deprecation notices.
 - `AGENTS.md` is auto-written by `next dev`; commit it rather than removing it.
 
-
 ## Skill
+
 Usa siempre /frontend-design para diseñar la interfaz de usuario.
