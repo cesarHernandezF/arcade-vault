@@ -1,6 +1,6 @@
 # SPEC 07 — Juego Tetris en la plataforma
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 05, SPEC 06
 > **Date:** 2026-11-13
 > **Objective:** Adaptar el Tetris de `references/started-games/03-tetris` como módulo TypeScript aislado dentro del canvas 800×600, registrarlo y sembrarlo en `games` para que tenga ficha, jugar, guardado de puntuaciones y leaderboard, y añadir la pestaña GLOBAL al Salón de la Fama.
