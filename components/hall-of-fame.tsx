@@ -10,6 +10,8 @@ export interface HallEntry {
 export default function HallOfFame({ entries }: { entries: HallEntry[] }) {
   const [tab, setTab] = useState(entries[0]?.id);
   const rows = (entries.find((e) => e.id === tab) ?? entries[0])?.rows ?? [];
+  // La columna JUEGO solo aparece cuando las filas traen el título del juego (GLOBAL).
+  const showGame = rows.some((r) => r.game !== undefined);
   return (
     <div className="av-hall fade-in">
       <div className="hall-head">
@@ -75,10 +77,11 @@ export default function HallOfFame({ entries }: { entries: HallEntry[] }) {
               </div>
             )}
           </div>
-          <div className="hall-table">
+          <div className={"hall-table" + (showGame ? " with-game" : "")}>
             <div className="th">
               <div>RANGO</div>
               <div>JUGADOR</div>
+              {showGame && <div className="gm">JUEGO</div>}
               <div>PUNTUACIÓN</div>
               <div>FECHA</div>
             </div>
@@ -90,6 +93,7 @@ export default function HallOfFame({ entries }: { entries: HallEntry[] }) {
               >
                 <div className="rk">#{String(r.rank).padStart(2, "0")}</div>
                 <div className="pl">{r.name}</div>
+                {showGame && <div className="gm">{r.game}</div>}
                 <div className="sc">{r.score.toLocaleString("es-ES")}</div>
                 <div className="dt">{r.date}</div>
               </div>
