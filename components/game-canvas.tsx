@@ -32,6 +32,7 @@ export default function GameCanvas({ id, events, onEngine }: GameCanvasProps) {
         onLevel: (l) => eventsRef.current.onLevel(l),
         onGameOver: (s) => eventsRef.current.onGameOver(s),
         onRestart: () => eventsRef.current.onRestart(),
+        onLines: (l) => eventsRef.current.onLines?.(l),
       });
       onEngineRef.current?.(engine);
     });

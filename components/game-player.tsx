@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -7,32 +6,29 @@ import { saveScore } from "@/app/juegos/[id]/jugar/actions";
 import GameCanvas from "@/components/game-canvas";
 import type { GameEngine } from "@/lib/game-engine";
 import type { Game } from "@/lib/games";
+import { DEFAULT_GAME_META, GAME_META } from "@/lib/games/registry";
 import { useSession } from "@/lib/session";
-
-const INITIAL_LIVES = 3;
 const PLAYER_NAME_KEY = "av_player_name";
-
 export default function GamePlayer({ game }: { game: Game }) {
   const router = useRouter();
   const { user } = useSession();
+  const meta = { ...DEFAULT_GAME_META, ...GAME_META[game.id] };
   const [score, setScore] = useState(0);
-  const [lives, setLives] = useState(INITIAL_LIVES);
+  const [lives, setLives] = useState(meta.initialLives);
   const [engineLevel, setEngineLevel] = useState(1);
+  const [lines, setLines] = useState(0);
   const [paused, setPaused] = useState(false);
   const [over, setOver] = useState(false);
   const [saved, setSaved] = useState(false);
   // La sesión se lee tras el montaje; mientras el usuario no edite, el nombre sigue a la sesión.
   const [editedName, setEditedName] = useState<string | null>(null);
-
   // Nombre recordado de partidas anteriores; se lee tras el montaje (como lib/session.tsx).
   const [storedName, setStoredName] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-
   // Orden del valor inicial: nombre recordado, nombre de sesión, INVITADO.
   const name = editedName ?? storedName ?? user?.name ?? "INVITADO";
   const engineRef = useRef<GameEngine | null>(null);
-
   useEffect(() => {
     try {
       const raw = localStorage.getItem(PLAYER_NAME_KEY);
@@ -42,34 +38,30 @@ export default function GamePlayer({ game }: { game: Game }) {
       // localStorage bloqueado: se usa el nombre de sesión o INVITADO.
     }
   }, []);
-
   // React controla la pausa: el motor solo expone pause() y resume().
   useEffect(() => {
     if (paused) engineRef.current?.pause();
     else engineRef.current?.resume();
   }, [paused]);
-
   const resetState = () => {
     setScore(0);
-    setLives(INITIAL_LIVES);
+    setLives(meta.initialLives);
     setEngineLevel(1);
+    setLines(0);
     setPaused(false);
     setOver(false);
     setSaved(false);
     setSaving(false);
     setSaveError(null);
   };
-
   const restart = () => {
     resetState();
     engineRef.current?.restart();
   };
-
   const finish = () => {
     if (engineRef.current) engineRef.current.endGame();
     else setOver(true);
   };
-
   const handleSave = async () => {
     if (saving || saved) return;
     setSaving(true);
@@ -95,7 +87,6 @@ export default function GamePlayer({ game }: { game: Game }) {
       }
     }
   };
-
   return (
     <div className="av-player fade-in">
       <div className="player-hud">
@@ -118,6 +109,12 @@ export default function GamePlayer({ game }: { game: Game }) {
             <div className="l">Nivel</div>
             <div className="v">{String(engineLevel).padStart(2, "0")}</div>
           </div>
+          {meta.lines && (
+            <div className="hud-stat">
+              <div className="l">Lines</div>
+              <div className="v">{lines}</div>
+            </div>
+          )}
         </div>
         <div className="hud-actions">
           <button
@@ -143,7 +140,6 @@ export default function GamePlayer({ game }: { game: Game }) {
           </Link>
         </div>
       </div>
-
       <div className="crt">
         <div className="crt-screen">
           <GameCanvas
@@ -152,6 +148,7 @@ export default function GamePlayer({ game }: { game: Game }) {
               onScore: setScore,
               onLives: setLives,
               onLevel: setEngineLevel,
+              onLines: setLines,
               onGameOver: (finalScore) => {
                 setScore(finalScore);
                 setOver(true);
@@ -189,7 +186,6 @@ export default function GamePlayer({ game }: { game: Game }) {
           <span>CARGA · 1MB</span>
         </div>
       </div>
-
       {over && (
         <div className="modal-bd">
           <div className="modal">
