@@ -1,6 +1,6 @@
 # SPEC 08 — Juego Arkanoid en la plataforma
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 05, SPEC 06, SPEC 07
 > **Date:** 2026-11-20
 > **Objective:** Adaptar el Arkanoid de `references/started-games/04-arkanoid` como módulo TypeScript aislado dentro del canvas 800×600, con sus sprites y sonidos, registrarlo y sembrarlo en `games` para que tenga ficha, jugar, guardado de puntuaciones y leaderboard.
