@@ -9,9 +9,11 @@ export interface GameMeta {
 export const DEFAULT_GAME_META: GameMeta = { initialLives: 3, lines: false };
 export const GAME_META: Record<string, Partial<GameMeta>> = {
   tetris: { initialLives: 1, lines: true },
+  snake: { initialLives: 1 },
 };
 export const GAME_ENGINES: Record<string, () => Promise<{ createEngine: CreateEngine }>> = {
   asteroides: () => import("@/lib/games/asteroides/engine"),
   tetris: () => import("@/lib/games/tetris/engine"),
   arkanoid: () => import("@/lib/games/arkanoid/engine"),
+  snake: () => import("@/lib/games/snake/engine"),
 };
