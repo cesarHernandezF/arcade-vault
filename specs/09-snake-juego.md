@@ -1,6 +1,6 @@
 # SPEC 09 — Juego Snake en la plataforma
 
-> **Status:** Aprobado
+> **Status:** Implementado
 > **Depends on:** SPEC 05, SPEC 06, SPEC 07, SPEC 08
 > **Date:** 2026-11-20
 > **Objective:** Crear el juego Snake (sin código de referencia) como módulo TypeScript aislado dentro del canvas 800×600, con las frutas de `references/source-assets/snake-assets`, registrarlo y sembrarlo en `games` para que tenga ficha, jugar, guardado de puntuaciones y leaderboard.
