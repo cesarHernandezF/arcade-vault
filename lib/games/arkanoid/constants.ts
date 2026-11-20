@@ -1,0 +1,42 @@
+// Constantes copiadas de game.js, levels.js y spritesheet.js del original, sin cambiar valores.
+export const W = 800;
+export const H = 600;
+export const INITIAL_LIVES = 3;
+export const POINTS_PER_BLOCK = 10;
+export const MAX_LEVEL = 5;
+export const PADDLE_SPEED = 400; // px/s
+export const PADDLE_Y = 560;
+export const PADDLE_W = 81; // el código dibuja 81 aunque el sprite mide 162
+export const PADDLE_H = 14;
+export const PADDLE_BOUNCE_TOLERANCE = 8; // px bajo la cara superior de la paleta
+export const BALL_W = 16;
+export const BALL_H = 16;
+export const BASE_BALL_VX = 200;
+export const BASE_BALL_VY = -300;
+export const BLOCK_COLS = 10;
+export const BLOCK_ROWS = 6;
+export const BLOCK_W = 64;
+export const BLOCK_H = 24;
+export const BLOCKS_ORIGIN_X = (W - BLOCK_COLS * BLOCK_W) / 2;
+export const BLOCKS_ORIGIN_Y = 80;
+export const EXPLOSION_DURATION = 150; // ms
+export const EXPLOSION_FRAME_COUNT = 4;
+export const MAX_DT = 50; // ms
+// HUD y overlays del canvas
+export const HUD_PAD = 10;
+export const HUD_LIFE_SIZE = 16;
+export const HUD_LIFE_SPACING = 4;
+export const HUD_FONT = "bold 18px monospace";
+export const OVERLAY_BG = "rgba(0, 0, 0, 0.6)";
+export const OVERLAY_TITLE_FONT = "bold 64px monospace";
+// "¡Completaste el juego!" (22 caracteres) no cabe en 800 px a 64 px: 22 × 38,4 = 845 px.
+export const OVERLAY_WIN_FONT = "bold 56px monospace";
+export const OVERLAY_SCORE_FONT = "bold 18px monospace";
+export const OVERLAY_HINT_FONT = "14px monospace";
+export const GAME_OVER_TEXT = "GAME OVER";
+export const WIN_TEXT = "¡Completaste el juego!";
+export const RESTART_HINT = "ENTER PARA REINICIAR";
+// Sonidos servidos desde public/
+export const SPRITESHEET_SRC = "/games/arkanoid/spritesheet-breakout.png";
+export const BOUNCE_SOUND_SRC = "/games/arkanoid/sounds/ball-bounce.mp3";
+export const BREAK_SOUND_SRC = "/games/arkanoid/sounds/break-sound.mp3";
